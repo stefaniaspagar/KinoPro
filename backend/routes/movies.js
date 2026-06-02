@@ -5,6 +5,7 @@ const router = express.Router();
 const TMDB_KEY = process.env.TMDB_API_KEY;
 const BASE_URL = "https://api.themoviedb.org/3";
 
+// 🔥 Популярные фильмы
 router.get("/popular", async (req, res) => {
   try {
     const page = req.query.page || 1;
@@ -20,6 +21,7 @@ router.get("/popular", async (req, res) => {
   }
 });
 
+// 🔥 Детальная страница фильма
 router.get("/:id", async (req, res) => {
   try {
     const id = req.params.id;
