@@ -1,35 +1,31 @@
-import express from "express";
-import fetch from "node-fetch";
+const express = require("express");
+const fetch = require("node-fetch");
 
 const router = express.Router();
+const TMDB_KEY = process.env.TMDB_API_KEY;
+const BASE_URL = "https://api.themoviedb.org/3";
 
-// 🔍 Поиск фильмов, сериалов и персон
 router.get("/", async (req, res) => {
   try {
-    const query = req.query.query;
+    const query = req.query.query || "";
+    const page = req.query.page || 1;
 
-    if (!query || query.trim() === "") {
-      return res.status(400).json({ error: "Query is required" });
+    if (!query) {
+      return res.json({ results: [], page: 1, total_pages: 1 });
     }
 
-    const response = await fetch(
-      `https://api.themoviedb.org/3/search/multi?query=${encodeURIComponent(
-        query
-      )}&language=ru-RU`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.TMDB_TOKEN}`,
-        },
-      }
-    );
+    const url = `${BASE_URL}/search/multi?api_key=${TMDB_KEY}&language=ru-RU&query=${encodeURIComponent(
+      query
+    )}&page=${page}&include_adult=false`;
 
+    const response = await fetch(url);
     const data = await response.json();
-    res.json(data);
 
-  } catch (error) {
-    console.error("Search error:", error);
-    res.status(500).json({ error: "Search error" });
+    res.json(data);
+  } catch (err) {
+    console.error("Ошибка /search:", err);
+    res.status(500).json({ error: "Ошибка поиска" });
   }
 });
 
-export default router;
+module.exports = router;
