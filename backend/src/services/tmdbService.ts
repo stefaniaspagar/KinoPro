@@ -1,108 +1,110 @@
-import axios from 'axios';
+import axios from "axios";
 
-const TMDB_BASE_URL = process.env.TMDB_BASE_URL || 'https://api.themoviedb.org/3';
+const TMDB_BASE_URL = process.env.TMDB_BASE_URL || "https://api.themoviedb.org/3";
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
+const axiosTMDB = axios.create({
+  baseURL: TMDB_BASE_URL,
+  params: {
+    api_key: TMDB_API_KEY, // ← ВАЖНО: v3 ключ передаётся ТОЛЬКО так
+    language: "ru-RU",
+  },
+});
+
 export const tmdbService = {
-  // Получить популярные фильмы
+  // ============================
+  // 🎬 ФИЛЬМЫ
+  // ============================
+
   getPopularMovies: async (page = 1) => {
-    try {
-      const response = await axios.get(`${TMDB_BASE_URL}/movie/popular`, {
-        params: {
-          api_key: TMDB_API_KEY,
-          page,
-          language: 'ru-RU'
-        }
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching popular movies:', error);
-      throw error;
-    }
+    const response = await axiosTMDB.get("/movie/popular", {
+      params: { page },
+    });
+    return response.data;
   },
 
-  // Поиск фильмов
   searchMovies: async (query: string, page = 1) => {
-    try {
-      const response = await axios.get(`${TMDB_BASE_URL}/search/movie`, {
-        params: {
-          api_key: TMDB_API_KEY,
-          query,
-          page,
-          language: 'ru-RU'
-        }
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Error searching movies:', error);
-      throw error;
-    }
+    const response = await axiosTMDB.get("/search/movie", {
+      params: { query, page },
+    });
+    return response.data;
   },
 
-  // Получить детали фильма
   getMovieDetails: async (movieId: number) => {
-    try {
-      const response = await axios.get(`${TMDB_BASE_URL}/movie/${movieId}`, {
-        params: {
-          api_key: TMDB_API_KEY,
-          language: 'ru-RU'
-        }
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching movie details:', error);
-      throw error;
-    }
+    const response = await axiosTMDB.get(`/movie/${movieId}`);
+    return response.data;
   },
 
-  // Получить рекомендации для фильма
   getMovieRecommendations: async (movieId: number, page = 1) => {
-    try {
-      const response = await axios.get(`${TMDB_BASE_URL}/movie/${movieId}/recommendations`, {
-        params: {
-          api_key: TMDB_API_KEY,
-          page,
-          language: 'ru-RU'
-        }
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching recommendations:', error);
-      throw error;
-    }
+    const response = await axiosTMDB.get(`/movie/${movieId}/recommendations`, {
+      params: { page },
+    });
+    return response.data;
   },
 
-  // Получить фильмы по жанру
   getMoviesByGenre: async (genreId: number, page = 1) => {
-    try {
-      const response = await axios.get(`${TMDB_BASE_URL}/discover/movie`, {
-        params: {
-          api_key: TMDB_API_KEY,
-          with_genres: genreId,
-          page,
-          language: 'ru-RU'
-        }
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching movies by genre:', error);
-      throw error;
-    }
+    const response = await axiosTMDB.get("/discover/movie", {
+      params: { with_genres: genreId, page },
+    });
+    return response.data;
   },
 
-  // Получить список жанров
   getGenres: async () => {
-    try {
-      const response = await axios.get(`${TMDB_BASE_URL}/genre/movie/list`, {
-        params: {
-          api_key: TMDB_API_KEY,
-          language: 'ru-RU'
-        }
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching genres:', error);
-      throw error;
-    }
-  }
+    const response = await axiosTMDB.get("/genre/movie/list");
+    return response.data;
+  },
+
+  // ============================
+  // 📺 СЕРИАЛЫ (НОВОЕ)
+  // ============================
+
+  getPopularTV: async (page = 1) => {
+    const response = await axiosTMDB.get("/tv/popular", {
+      params: { page },
+    });
+    return response.data;
+  },
+
+  getTopRatedTV: async (page = 1) => {
+    const response = await axiosTMDB.get("/tv/top_rated", {
+      params: { page },
+    });
+    return response.data;
+  },
+
+  getLatestTV: async () => {
+    const response = await axiosTMDB.get("/tv/latest");
+    return response.data;
+  },
+
+  getTVDetails: async (tvId: number) => {
+    const response = await axiosTMDB.get(`/tv/${tvId}`);
+    return response.data;
+  },
+
+  searchTV: async (query: string, page = 1) => {
+    const response = await axiosTMDB.get("/search/tv", {
+      params: { query, page },
+    });
+    return response.data;
+  },
+
+  getTVGenres: async () => {
+    const response = await axiosTMDB.get("/genre/tv/list");
+    return response.data;
+  },
+
+  getTVByGenre: async (genreId: number, page = 1) => {
+    const response = await axiosTMDB.get("/discover/tv", {
+      params: { with_genres: genreId, page },
+    });
+    return response.data;
+  },
+
+  getTVRecommendations: async (tvId: number, page = 1) => {
+    const response = await axiosTMDB.get(`/tv/${tvId}/recommendations`, {
+      params: { page },
+    });
+    return response.data;
+  },
 };

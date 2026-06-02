@@ -1,79 +1,99 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
 import MovieSection from '@/components/MovieSection';
 import Features from '@/components/Features';
 import Footer from '@/components/Footer';
+import { fetchPopularMovies } from '@/lib/tmdbApi';
+
+interface Movie {
+  id: number;
+  title: string;
+  poster_path: string;
+  vote_average: number;
+  genre_ids: number[];
+}
 
 export default function Home() {
-  // Примеры фильмов
-  const popularMovies = [
-    {
-      id: '1',
-      title: 'Интерстеллар',
-      rating: 8.6,
-      genre: 'Научная фантастика',
-      image: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400&h=600&fit=crop',
-    },
-    {
-      id: '2',
-      title: 'Начало',
-      rating: 8.8,
-      genre: 'Триллер',
-      image: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&h=600&fit=crop',
-    },
-    {
-      id: '3',
-      title: 'Матрица',
-      rating: 8.7,
-      genre: 'Боевик',
-      image: 'https://images.unsplash.com/photo-1489599849228-ed4dc9ee6131?w=400&h=600&fit=crop',
-    },
-    {
-      id: '4',
-      title: 'Тёмный рыцарь',
-      rating: 9.0,
-      genre: 'Боевик',
-      image: 'https://images.unsplash.com/photo-1542272604-787c62d465d1?w=400&h=600&fit=crop',
-    },
-  ];
+  const [popularMovies, setPopularMovies] = useState<Movie[]>([]);
+  const [newReleases, setNewReleases] = useState<Movie[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const newReleases = [
-    {
-      id: '5',
-      title: 'Дюна 2',
-      rating: 8.5,
-      genre: 'Фантастика',
-      image: 'https://images.unsplash.com/photo-1516573191022-7bccad2d25c5?w=400&h=600&fit=crop',
-    },
-    {
-      id: '6',
-      title: 'Барби',
-      rating: 7.9,
-      genre: 'Комедия',
-      image: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&h=600&fit=crop',
-    },
-    {
-      id: '7',
-      title: 'Опенгеймер',
-      rating: 8.3,
-      genre: 'Драма',
-      image: 'https://images.unsplash.com/photo-1487180144351-b8472da7d491?w=400&h=600&fit=crop',
-    },
-    {
-      id: '8',
-      title: 'Килlers',
-      rating: 8.1,
-      genre: 'Боевик',
-      image: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400&h=600&fit=crop',
-    },
-  ];
+  useEffect(() => {
+    const loadMovies = async () => {
+      try {
+        setLoading(true);
+        const popular = await fetchPopularMovies(1);
+        setPopularMovies(popular.results?.slice(0, 4) || []);
+        
+        const releases = await fetchPopularMovies(2);
+        setNewReleases(releases.results?.slice(0, 4) || []);
+        
+        setError(null);
+      } catch (err) {
+        console.error('Error loading movies:', err);
+        setError('Не удалось загрузить фильмы. Проверьте TMDB_API_KEY в backend/.env');
+
+        setPopularMovies([
+          {
+            id: 1,
+            title: 'Интерстеллар',
+            vote_average: 8.6,
+            genre_ids: [878],
+            poster_path: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400&h=600&fit=crop',
+          },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMovies();
+  }, []);
+
+  const formatMovies = (movies: Movie[]) => {
+    return movies.map((movie) => ({
+      id: movie.id.toString(),
+      title: movie.title,
+      rating: movie.vote_average,
+      genre: 'Фильм',
+      image: `https://image.tmdb.org/t/p/w400${movie.poster_path}`,
+    }));
+  };
+
+  if (error) {
+    console.error('Movie loading error:', error);
+  }
 
   return (
     <main>
       <Header />
-      <Hero />
-      <MovieSection title="Популярные фильмы" movies={popularMovies} />
-      <MovieSection title="Новые релизы" movies={newReleases} />
+
+      {/* 🔥 Подтягиваем баннер вверх ТОЛЬКО на главной */}
+      <div className="-mt-10">
+        <Hero />
+      </div>
+
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '40px' }}>
+          <p>Загрузка фильмов...</p>
+        </div>
+      ) : (
+        <>
+          <MovieSection title="Популярные фильмы" movies={formatMovies(popularMovies)} />
+          <MovieSection title="Новые релизы" movies={formatMovies(newReleases)} />
+        </>
+      )}
+
+      {error && (
+        <div style={{ textAlign: 'center', padding: '20px', color: 'red' }}>
+          <p>{error}</p>
+        </div>
+      )}
+
       <Features />
       <Footer />
     </main>

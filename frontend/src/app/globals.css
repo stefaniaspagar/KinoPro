@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================
+   СБРОС И БАЗОВЫЕ СТИЛИ
+   ============================ */
 * {
   margin: 0;
   padding: 0;
@@ -20,7 +23,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbar */
+/* ============================
+   КАСТОМНЫЙ СКРОЛЛБАР
+   ============================ */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -39,7 +44,9 @@ body {
   background: #64748b;
 }
 
-/* Animations */
+/* ============================
+   ТВОИ АНИМАЦИИ
+   ============================ */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -83,4 +90,22 @@ body {
 
 .animate-slide-in-right {
   animation: slideInRight 0.6s ease-out;
+}
+
+/* ============================
+   МОЯ АНИМАЦИЯ ДЛЯ ПОИСКА (fade + slide)
+   ============================ */
+@keyframes fadeSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-slide {
+  animation: fadeSlide 0.25s ease-out forwards;
 }

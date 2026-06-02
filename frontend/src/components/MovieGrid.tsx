@@ -1,69 +1,72 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import MovieCard from "./MovieCard";
+import Pagination from "./Pagination";
 
 export default function MovieGrid() {
   const [movies, setMovies] = useState<any[]>([]);
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetch(`/api/movies?page=${page}`)
+  const loadMovies = () => {
+    setLoading(true);
+
+    fetch(`http://localhost:5000/api/movies/popular?page=${page}`)
       .then((res) => res.json())
       .then((data) => {
-        console.log("MOVIES:", data);
-        setMovies(Array.isArray(data) ? data : []);
+        console.log("TMDB DATA:", data);
+
+        if (data && Array.isArray(data.results)) {
+          setMovies(data.results);
+        } else {
+          setMovies([]);
+        }
+
+        setLoading(false);
       })
       .catch((err) => {
         console.error("FETCH ERROR:", err);
         setMovies([]);
+        setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    loadMovies();
   }, [page]);
 
   return (
     <div className="flex flex-col gap-6 overflow-x-hidden">
-      {/* Фильмы */}
-      {movies.length === 0 && (
+      {loading && (
         <div className="text-center opacity-70">Фильмы загружаются...</div>
       )}
 
-      {movies.length > 0 &&
-        movies.map((movie) => (
-          <a
-            key={movie.id}
-            href={`/film/${movie.id}`}
-            className="flex gap-4 items-center bg-[#111] p-4 rounded-lg hover:bg-[#1a1a1a] transition"
-          >
-            <img
-              src={`https://image.tmdb.org/t/p/w200${movie.poster_path}`}
-              alt={movie.title}
-              className="w-20 h-28 object-cover rounded"
-            />
+      {!loading && movies.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5 p-4">
+          {movies.map((movie) => {
+            const image = movie.poster_path
+              ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+              : "/no-poster.jpg";
 
-            <div>
-              <h3 className="text-lg font-semibold">{movie.title}</h3>
-              <p className="text-sm opacity-70">{movie.release_date}</p>
-            </div>
-          </a>
-        ))}
+            return (
+              <MovieCard
+                key={movie.id}
+                title={movie.title}
+                rating={movie.vote_average}
+                genre={movie.release_date?.slice(0, 4) || "—"}
+                image={image}
+              />
+            );
+          })}
+        </div>
+      )}
 
-      {/* Пагинация */}
-      <div className="flex justify-between mt-4">
-        <button
-          onClick={() => setPage((p) => Math.max(1, p - 1))}
-          className="px-4 py-2 bg-[#222] rounded hover:bg-[#333]"
-        >
-          Назад
-        </button>
-
-        <span className="opacity-70">Страница {page}</span>
-
-        <button
-          onClick={() => setPage((p) => p + 1)}
-          className="px-4 py-2 bg-[#222] rounded hover:bg-[#333]"
-        >
-          Вперёд
-        </button>
-      </div>
+      {/* Пагинация как на Киного */}
+      <Pagination
+        currentPage={page}
+        onPageChange={(newPage) => setPage(newPage)}
+      />
     </div>
   );
 }

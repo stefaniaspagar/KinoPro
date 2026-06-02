@@ -1,6 +1,6 @@
 export default function Hero() {
   return (
-    <section className="relative w-full h-[600px] flex items-center justify-center overflow-hidden">
+    <section className="relative w-full h-[600px] flex items-center justify-center">
       {/* Баннер */}
       <img
         src="/banner.jpg"

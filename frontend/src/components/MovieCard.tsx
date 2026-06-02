@@ -1,58 +1,43 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import Link from "next/link";
+import Image from "next/image";
 
-interface MovieCardProps {
+type MovieCardProps = {
+  id: number;
   title: string;
   rating: number;
   genre: string;
   image: string;
-}
+};
 
-export default function MovieCard({ title, rating, genre, image }: MovieCardProps) {
-  const [isHovered, setIsHovered] = useState(false);
-
+export default function MovieCard({ id, title, rating, genre, image }: MovieCardProps) {
   return (
-    <div
-      className="relative overflow-hidden rounded-lg cursor-pointer group"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Image */}
-      <div
-        className="relative h-64 bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden"
-        style={{
-          backgroundImage: `url('${image}')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      >
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-300" />
+    <Link href={`/movie/${id}`}>
+      <div className="bg-zinc-900 rounded-lg overflow-hidden shadow-md hover:scale-105 transition-transform cursor-pointer">
+        <Image
+          src={image}
+          alt={title}
+          width={500}
+          height={750}
+          className="w-full h-auto object-cover"
+          priority={false}
+        />
 
-        {/* Rating badge */}
-        <div className="absolute top-3 right-3 bg-red-600 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1">
-          <span>★</span>
-          <span>{rating}</span>
+        <div className="p-3">
+          <h3 className="text-white text-sm font-semibold truncate">
+            {title}
+          </h3>
+
+          <div className="flex justify-between items-center mt-1">
+            <p className="text-gray-400 text-xs">{genre}</p>
+
+            <span className="text-yellow-400 text-xs font-semibold">
+              ⭐ {rating.toFixed(1)}
+            </span>
+          </div>
         </div>
       </div>
-
-      {/* Info */}
-      <div className="p-4 bg-slate-900 border-t border-slate-800">
-        <h3 className="font-bold text-lg truncate group-hover:text-red-500 transition-colors">
-          {title}
-        </h3>
-        <p className="text-sm text-gray-400 mt-1">{genre}</p>
-      </div>
-
-      {/* Hover overlay */}
-      {isHovered && (
-        <div className="absolute inset-0 bg-black/80 flex items-center justify-center rounded-lg">
-          <button className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors">
-            ▶ Смотреть
-          </button>
-        </div>
-      )}
-    </div>
+    </Link>
   );
 }

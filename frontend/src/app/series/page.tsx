@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import MovieGrid from "@/components/MovieGrid";
+import TVGrid from "@/components/TVGrid";
 
-export default function FilmsPage({ searchParams }) {
+export default function SeriesPage({ searchParams }) {
   const page = Number(searchParams.page) || 1;
 
   const [showGenres, setShowGenres] = useState(false);
@@ -15,13 +15,13 @@ export default function FilmsPage({ searchParams }) {
   const box =
     "w-full px-3 py-2 bg-[#0f0f0f] border border-white/20 rounded-md hover:border-[#ff6f8f] transition text-white";
 
-  // стиль пунктов списка (жанры, категории, годы, страны)
+  // стиль пунктов списка
   const item =
     "block w-full px-3 py-2 bg-[#151515] border border-white/10 rounded-md text-white hover:border-[#ff6f8f] transition";
 
   return (
     <main className="flex overflow-x-hidden">
-      {/* 🔹 ЛЕВАЯ ПАНЕЛЬ — шире на 2 см */}
+      {/* 🔹 ЛЕВАЯ ПАНЕЛЬ — шире на 2 см (как в фильмах) */}
       <aside className="w-44 bg-[#0d0d0d]/90 backdrop-blur-sm border-r border-white/10 h-screen sticky top-0 overflow-y-auto">
         <div className="p-4">
           <h2 className="text-lg font-semibold text-white mb-4">Фильтры</h2>
@@ -37,26 +37,14 @@ export default function FilmsPage({ searchParams }) {
 
             {showGenres && (
               <ul className="space-y-2 mt-2 text-sm">
-                <li><a href="#" className={item}>Боевик</a></li>
-                <li><a href="#" className={item}>Комедия</a></li>
                 <li><a href="#" className={item}>Драма</a></li>
-                <li><a href="#" className={item}>Ужасы</a></li>
-                <li><a href="#" className={item}>Фантастика</a></li>
-                <li><a href="#" className={item}>Фэнтези</a></li>
+                <li><a href="#" className={item}>Комедия</a></li>
                 <li><a href="#" className={item}>Триллер</a></li>
+                <li><a href="#" className={item}>Фэнтези</a></li>
+                <li><a href="#" className={item}>Фантастика</a></li>
                 <li><a href="#" className={item}>Криминал</a></li>
-                <li><a href="#" className={item}>Мелодрама</a></li>
                 <li><a href="#" className={item}>Приключения</a></li>
-                <li><a href="#" className={item}>Анимация</a></li>
                 <li><a href="#" className={item}>Аниме</a></li>
-                <li><a href="#" className={item}>Семейный</a></li>
-                <li><a href="#" className={item}>Исторический</a></li>
-                <li><a href="#" className={item}>Биография</a></li>
-                <li><a href="#" className={item}>Документальный</a></li>
-                <li><a href="#" className={item}>Военный</a></li>
-                <li><a href="#" className={item}>Вестерн</a></li>
-                <li><a href="#" className={item}>Музыкальный</a></li>
-                <li><a href="#" className={item}>Спорт</a></li>
               </ul>
             )}
           </div>
@@ -72,10 +60,10 @@ export default function FilmsPage({ searchParams }) {
 
             {showCategories && (
               <ul className="space-y-2 mt-2 text-sm">
-                <li><a href="/films?page=1" className={item}>Все фильмы</a></li>
-                <li><a href="/series" className={item}>Сериалы</a></li>
-                <li><a href="#" className={item}>Мультфильмы</a></li>
+                <li><a href="/series?page=1" className={item}>Все сериалы</a></li>
+                <li><a href="/films" className={item}>Фильмы</a></li>
                 <li><a href="#" className={item}>Аниме</a></li>
+                <li><a href="#" className={item}>Мультсериалы</a></li>
               </ul>
             )}
           </div>
@@ -111,7 +99,7 @@ export default function FilmsPage({ searchParams }) {
             {showCountries && (
               <ul className="space-y-2 mt-2 text-sm">
                 <li><a href="#" className={item}>Американские</a></li>
-                <li><a href="#" className={item}>Русские</a></li>
+                <li><a href="#" className={item}>Корейские</a></li>
                 <li><a href="#" className={item}>Турецкие</a></li>
                 <li><a href="#" className={item}>Европейские</a></li>
               </ul>
@@ -124,10 +112,10 @@ export default function FilmsPage({ searchParams }) {
       {/* 🔹 ПРАВАЯ ЧАСТЬ */}
       <div className="flex-1 px-6 py-8 overflow-x-hidden">
         <h1 className="text-3xl font-bold text-white mb-6">
-          Фильмы — страница {page}
+          Сериалы — страница {page}
         </h1>
 
-        <MovieGrid page={page} />
+        <TVGrid page={page} />
       </div>
     </main>
   );
