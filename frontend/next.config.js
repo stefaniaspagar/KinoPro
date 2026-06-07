@@ -5,12 +5,14 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "image.tmdb.org",
+        pathname: "/t/p/**",
       },
       {
         protocol: "https",
         hostname: "via.placeholder.com",
       },
     ],
+    unoptimized: true, // 🔥 Отключает оптимизацию Next.js (исправляет 500 ошибки)
   },
 };
 

@@ -1,3 +1,7 @@
+"use client";
+
+import Link from "next/link";
+
 export default function Hero() {
   return (
     <section className="relative w-full h-[600px] flex items-center justify-center">
@@ -27,7 +31,7 @@ export default function Hero() {
           className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto animate-fade-in"
           style={{ animationDelay: "0.2s" }}
         >
-          Более 500 000 фильмов и сериалов в вашем распоряжении. Смотрите без
+          Более 100 000 фильмов и сериалов в вашем распоряжении. Смотрите без
           ограничений 24/7
         </p>
 
@@ -35,12 +39,13 @@ export default function Hero() {
           className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in"
           style={{ animationDelay: "0.4s" }}
         >
-          <button className="px-8 py-4 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-bold rounded-lg transition-all transform hover:scale-105 shadow-lg shadow-red-600/50">
+          {/* 🔥 Кнопка ведёт на /films */}
+          <Link
+            href="/films"
+            className="px-8 py-4 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-bold rounded-lg transition-all transform hover:scale-105 shadow-lg shadow-red-600/50"
+          >
             Начать смотреть
-          </button>
-          <button className="px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg border border-slate-700 transition-all">
-            Подробнее
-          </button>
+          </Link>
         </div>
       </div>
     </section>

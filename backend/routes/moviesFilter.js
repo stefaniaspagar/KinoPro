@@ -5,6 +5,7 @@ const router = express.Router();
 const TMDB_KEY = process.env.TMDB_API_KEY;
 const BASE_URL = "https://api.themoviedb.org/3";
 
+// 🔥 Карта жанров
 const GENRES = {
   "Боевик": 28,
   "Комедия": 35,
@@ -24,11 +25,15 @@ const GENRES = {
   "Военный": 10752
 };
 
+// 🔥 Карта категорий
 const CATEGORY_MAP = {
   "Фильмы": "movie",
   "Сериалы": "tv"
 };
 
+//
+// 📌 1. ФИЛЬТРЫ (основная сетка фильмов)
+//
 router.get("/filter", async (req, res) => {
   try {
     const page = req.query.page || 1;
@@ -58,7 +63,7 @@ router.get("/filter", async (req, res) => {
     }
 
     const url = `${BASE_URL}/discover/${type}?${params.toString()}`;
-    console.log("TMDB URL:", url);
+    console.log("TMDB FILTER URL:", url);
 
     const response = await fetch(url);
     const data = await response.json();
@@ -71,6 +76,64 @@ router.get("/filter", async (req, res) => {
   } catch (err) {
     console.error("Ошибка /movies/filter:", err);
     res.status(500).json({ error: "Ошибка фильтрации" });
+  }
+});
+
+//
+// 📌 2. ПОПУЛЯРНЫЕ ФИЛЬМЫ
+//
+router.get("/popular", async (req, res) => {
+  try {
+    const page = req.query.page || 1;
+
+    const url = `${BASE_URL}/movie/popular?api_key=${TMDB_KEY}&language=ru-RU&page=${page}`;
+    console.log("TMDB POPULAR URL:", url);
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    res.json({
+      results: data.results || [],
+      page: data.page || 1,
+      total_pages: data.total_pages || 1
+    });
+  } catch (err) {
+    console.error("Ошибка /movies/popular:", err);
+    res.status(500).json({ error: "Ошибка загрузки популярных" });
+  }
+});
+
+//
+// 📌 3. НОВЫЕ РЕЛИЗЫ (исправлено! НЕ популярные)
+//
+router.get("/new", async (req, res) => {
+  try {
+    const page = req.query.page || 1;
+
+    const today = new Date().toISOString().split("T")[0];
+
+    const params = new URLSearchParams({
+      api_key: TMDB_KEY,
+      language: "ru-RU",
+      page: String(page),
+      sort_by: "release_date.desc",
+      "primary_release_date.lte": today
+    });
+
+    const url = `${BASE_URL}/discover/movie?${params.toString()}`;
+    console.log("TMDB NEW URL:", url);
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    res.json({
+      results: data.results || [],
+      page: data.page || 1,
+      total_pages: data.total_pages || 1
+    });
+  } catch (err) {
+    console.error("Ошибка /movies/new:", err);
+    res.status(500).json({ error: "Ошибка загрузки новых релизов" });
   }
 });
 

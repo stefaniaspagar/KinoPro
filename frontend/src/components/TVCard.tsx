@@ -5,38 +5,41 @@ import Image from "next/image";
 
 type TVCardProps = {
   id: number;
-  name: string;
-  poster_path: string | null;
-  first_air_date?: string;
+  title: string;
+  rating: number;
+  year: string;
+  image: string;
 };
 
-export default function TVCard({ id, name, poster_path, first_air_date }: TVCardProps) {
-  const posterUrl = poster_path
-    ? `https://image.tmdb.org/t/p/w500${poster_path}`
-    : "/no-poster.png";
+export default function TVCard({ id, title, rating, year, image }: TVCardProps) {
+  const safeImage =
+    image && image !== "undefined"
+      ? image
+      : "/no-poster.jpg";
 
   return (
-    <Link href={`/series/${id}`}>
-      <div className="bg-zinc-900 rounded-lg overflow-hidden shadow-md hover:scale-105 transition-transform cursor-pointer">
+    <Link href={`/tv/${id}`}>
+      <div className="bg-zinc-900 rounded-lg overflow-hidden shadow-md hover:scale-105 transition-transform cursor-pointer max-w-[150px]">
         <Image
-          src={posterUrl}
-          alt={name}
-          width={500}
-          height={750}
-          className="w-full h-auto object-cover"
-          priority={false}
+          src={safeImage}
+          alt={title}
+          width={150}
+          height={225}
+          className="w-full h-[225px] object-cover"
         />
 
-        <div className="p-3">
-          <h3 className="text-white text-sm font-semibold truncate">
-            {name}
+        <div className="p-2">
+          <h3 className="text-white text-xs font-semibold truncate">
+            {title}
           </h3>
 
-          {first_air_date && (
-            <p className="text-gray-400 text-xs mt-1">
-              {first_air_date.slice(0, 4)}
-            </p>
-          )}
+          <div className="flex justify-between items-center mt-1">
+            <p className="text-gray-400 text-[10px]">{year}</p>
+
+            <span className="text-yellow-400 text-[10px] font-semibold">
+              ⭐ {rating?.toFixed(1)}
+            </span>
+          </div>
         </div>
       </div>
     </Link>

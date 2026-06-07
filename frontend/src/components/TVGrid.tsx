@@ -4,37 +4,91 @@ import { useEffect, useState } from "react";
 import TVCard from "./TVCard";
 import Pagination from "./Pagination";
 
-export default function TVGrid() {
-  const [tvShows, setTvShows] = useState<any[]>([]);
-  const [page, setPage] = useState(1);
+const TV_GENRES: Record<string, number> = {
+  Боевик: 10759,
+  Анимация: 16,
+  Комедия: 35,
+  Криминал: 80,
+  Документальный: 99,
+  Драма: 18,
+  Семейный: 10751,
+  Фэнтези: 10765,
+  Исторический: 36,
+  Ужасы: 27,
+  Мистический: 9648,
+  Мелодрама: 10749,
+  Фантастика: 10765,
+  Триллер: 53,
+  Военный: 10768,
+  Вестерн: 37,
+  Спорт: 10770,
+  Аниме: 16,
+};
+
+const COUNTRY_MAP: Record<string, string> = {
+  Американские: "US",
+  Русские: "RU",
+  Турецкие: "TR",
+  Европейские: "FR",
+};
+
+export default function TVGrid({
+  page,
+  onPageChange,
+  genres = [],
+  years = [],
+  countries = [],
+}) {
+  const [shows, setShows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadTV = () => {
-    setLoading(true);
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
 
-    fetch(`http://localhost:5000/api/tv/popular?page=${page}`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("TMDB TV DATA:", data);
+        const params = new URLSearchParams();
+        params.set("page", String(page));
 
-        if (data && Array.isArray(data.results)) {
-          setTvShows(data.results);
-        } else {
-          setTvShows([]);
+        // 🔥 ЖАНРЫ
+        if (genres.length > 0) {
+          const ids = genres
+            .map((g) => TV_GENRES[g])
+            .filter(Boolean)
+            .join(",");
+          if (ids) params.set("genre", ids);
         }
 
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("FETCH ERROR:", err);
-        setTvShows([]);
-        setLoading(false);
-      });
-  };
+        // 🔥 ГОД
+        if (years.length > 0) {
+          params.set("year", years[0]);
+        }
 
-  useEffect(() => {
-    loadTV();
-  }, [page]);
+        // 🔥 СТРАНА
+        if (countries.length > 0) {
+          const code = COUNTRY_MAP[countries[0]];
+          if (code) params.set("country", code);
+        }
+
+        // 🔥 ПРАВИЛЬНЫЙ ENDPOINT
+        const res = await fetch(
+          `http://localhost:5000/api/tv/filter?${params.toString()}`,
+          { cache: "no-store" }
+        );
+
+        const data = await res.json();
+
+        setShows(Array.isArray(data.results) ? data.results : []);
+      } catch (err) {
+        console.error("TV FILTER ERROR:", err);
+        setShows([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, [page, genres, years, countries]);
 
   return (
     <div className="flex flex-col gap-6 overflow-x-hidden">
@@ -42,23 +96,38 @@ export default function TVGrid() {
         <div className="text-center opacity-70">Сериалы загружаются...</div>
       )}
 
-      {!loading && tvShows.length > 0 && (
+      {!loading && shows.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5 p-4">
-          {tvShows.map((tv) => (
-            <TVCard
-              key={tv.id}
-              id={tv.id}
-              name={tv.name}
-              poster_path={tv.poster_path}
-              first_air_date={tv.first_air_date}
-            />
-          ))}
+          {shows.map((show) => {
+            if (!show || !show.id) return null;
+
+            const image = show.poster_path
+              ? `https://image.tmdb.org/t/p/w500${show.poster_path}`
+              : "/no-poster.jpg";
+
+            return (
+              <TVCard
+                key={show.id}
+                id={show.id}
+                title={show.name || "Без названия"}
+                rating={show.vote_average || 0}
+                year={show.first_air_date?.slice(0, 4) || "—"}
+                image={image}
+              />
+            );
+          })}
+        </div>
+      )}
+
+      {!loading && shows.length === 0 && (
+        <div className="text-center opacity-70">
+          По выбранным фильтрам ничего не найдено.
         </div>
       )}
 
       <Pagination
         currentPage={page}
-        onPageChange={(newPage) => setPage(newPage)}
+        onPageChange={(newPage) => onPageChange(newPage)}
       />
     </div>
   );

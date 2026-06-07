@@ -1,4 +1,5 @@
 import MovieCard from './MovieCard';
+import { useRef, useState } from 'react';
 
 interface MovieSectionProps {
   title: string;
@@ -12,9 +13,24 @@ interface MovieSectionProps {
 }
 
 export default function MovieSection({ title, movies }: MovieSectionProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [hovered, setHovered] = useState(false);
+
+  const scrollLeft = () => {
+    scrollRef.current?.scrollBy({ left: -900, behavior: 'smooth' });
+  };
+
+  const scrollRight = () => {
+    scrollRef.current?.scrollBy({ left: 900, behavior: 'smooth' });
+  };
+
   return (
-    <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <div className="mb-8">
+    <section
+      className="py-12 px-4 sm:px-6 lg:px-8 w-full mx-auto relative"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div className="mb-6">
         <h2 className="text-3xl font-bold mb-2">
           <span className="bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent">
             {title}
@@ -23,17 +39,53 @@ export default function MovieSection({ title, movies }: MovieSectionProps) {
         <div className="w-20 h-1 bg-gradient-to-r from-red-600 to-pink-600 rounded-full" />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* 🔥 Левый градиент */}
+      {hovered && (
+        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-black/70 to-transparent pointer-events-none z-10 hidden md:block" />
+      )}
+
+      {/* 🔥 Правая градиентная тень */}
+      {hovered && (
+        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-black/70 to-transparent pointer-events-none z-10 hidden md:block" />
+      )}
+
+      {/* 🔥 Кнопка влево */}
+      <button
+        onClick={scrollLeft}
+        className={`absolute left-2 top-1/2 -translate-y-1/2 z-20 p-4 rounded-full bg-black/60 hover:bg-black/80 text-white text-2xl transition-all hidden md:flex ${
+          hovered ? 'opacity-100' : 'opacity-0'
+        }`}
+      >
+        ❮
+      </button>
+
+      {/* 🔥 Горизонтальная карусель */}
+      <div
+        ref={scrollRef}
+        className="flex gap-4 overflow-x-auto scrollbar-hide py-2 scroll-smooth"
+      >
         {movies.map((movie) => (
-          <MovieCard
-            key={movie.id}
-            title={movie.title}
-            rating={movie.rating}
-            genre={movie.genre}
-            image={movie.image}
-          />
+          <div key={movie.id} className="flex-shrink-0">
+            <MovieCard
+              id={Number(movie.id)}
+              title={movie.title}
+              rating={movie.rating}
+              genre={movie.genre}
+              image={movie.image}
+            />
+          </div>
         ))}
       </div>
+
+      {/* 🔥 Кнопка вправо */}
+      <button
+        onClick={scrollRight}
+        className={`absolute right-2 top-1/2 -translate-y-1/2 z-20 p-4 rounded-full bg-black/60 hover:bg-black/80 text-white text-2xl transition-all hidden md:flex ${
+          hovered ? 'opacity-100' : 'opacity-0'
+        }`}
+      >
+        ❯
+      </button>
     </section>
   );
 }

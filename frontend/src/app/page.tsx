@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Header from '@/components/Header';
-import Hero from '@/components/Hero';
-import MovieSection from '@/components/MovieSection';
-import Features from '@/components/Features';
-import Footer from '@/components/Footer';
-import { fetchPopularMovies } from '@/lib/tmdbApi';
+import { useEffect, useState } from "react";
+import Header from "@/components/Header";
+import Hero from "@/components/Hero";
+import MovieSection from "@/components/MovieSection";
+import Features from "@/components/Features";
+import Footer from "@/components/Footer";
+import { fetchPopularMovies } from "@/lib/backendApi";
 
 interface Movie {
   id: number;
@@ -26,24 +26,35 @@ export default function Home() {
     const loadMovies = async () => {
       try {
         setLoading(true);
-        const popular = await fetchPopularMovies(1);
-        setPopularMovies(popular.results?.slice(0, 4) || []);
-        
-        const releases = await fetchPopularMovies(2);
-        setNewReleases(releases.results?.slice(0, 4) || []);
-        
+
+        let popularList: Movie[] = [];
+        let releasesList: Movie[] = [];
+
+        // 🔥 Загружаем 5 страниц = 100 фильмов
+        for (let page = 1; page <= 5; page++) {
+          const popular = await fetchPopularMovies(page);
+          popularList.push(...popular.results);
+
+          const releases = await fetchPopularMovies(page + 5);
+          releasesList.push(...releases.results);
+        }
+
+        setPopularMovies(popularList.slice(0, 100));
+        setNewReleases(releasesList.slice(0, 100));
+
         setError(null);
       } catch (err) {
-        console.error('Error loading movies:', err);
-        setError('Не удалось загрузить фильмы. Проверьте TMDB_API_KEY в backend/.env');
+        console.error("Error loading movies:", err);
+        setError("Не удалось загрузить фильмы. Проверьте TMDB_API_KEY в backend/.env");
 
         setPopularMovies([
           {
             id: 1,
-            title: 'Интерстеллар',
+            title: "Интерстеллар",
             vote_average: 8.6,
             genre_ids: [878],
-            poster_path: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400&h=600&fit=crop',
+            poster_path:
+              "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400&h=600&fit=crop",
           },
         ]);
       } finally {
@@ -56,40 +67,43 @@ export default function Home() {
 
   const formatMovies = (movies: Movie[]) => {
     return movies.map((movie) => ({
-      id: movie.id.toString(),
+      id: movie.id,
       title: movie.title,
       rating: movie.vote_average,
-      genre: 'Фильм',
-      image: `https://image.tmdb.org/t/p/w400${movie.poster_path}`,
+      genre: "Фильм",
+      image: movie.poster_path
+        ? `https://image.tmdb.org/t/p/w400${movie.poster_path}`
+        : "/no-poster.jpg",
     }));
   };
-
-  if (error) {
-    console.error('Movie loading error:', error);
-  }
 
   return (
     <main>
       <Header />
 
-      {/* 🔥 Подтягиваем баннер вверх ТОЛЬКО на главной */}
       <div className="-mt-10">
         <Hero />
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '40px' }}>
+        <div style={{ textAlign: "center", padding: "40px" }}>
           <p>Загрузка фильмов...</p>
         </div>
       ) : (
         <>
-          <MovieSection title="Популярные фильмы" movies={formatMovies(popularMovies)} />
-          <MovieSection title="Новые релизы" movies={formatMovies(newReleases)} />
+          <MovieSection
+            title="Популярные фильмы"
+            movies={formatMovies(popularMovies)}
+          />
+          <MovieSection
+            title="Новые релизы"
+            movies={formatMovies(newReleases)}
+          />
         </>
       )}
 
       {error && (
-        <div style={{ textAlign: 'center', padding: '20px', color: 'red' }}>
+        <div style={{ textAlign: "center", padding: "20px", color: "red" }}>
           <p>{error}</p>
         </div>
       )}
